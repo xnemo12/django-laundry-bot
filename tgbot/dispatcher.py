@@ -10,7 +10,7 @@ from telegram import Bot, Update, BotCommand
 from telegram.ext import (
     Updater, Dispatcher, Filters,
     CommandHandler, MessageHandler,
-    CallbackQueryHandler,
+    CallbackQueryHandler, ConversationHandler, filters,
 )
 
 from dtb.celery import app  # event processing in async mode
@@ -20,10 +20,25 @@ from tgbot.handlers.utils import files, error
 from tgbot.handlers.admin import handlers as admin_handlers
 from tgbot.handlers.location import handlers as location_handlers
 from tgbot.handlers.onboarding import handlers as onboarding_handlers
+from tgbot.handlers.price import handlers as price_handlers
+from tgbot.handlers.courier import handlers as courier_handlers
 from tgbot.handlers.broadcast_message import handlers as broadcast_handlers
-from tgbot.handlers.onboarding.manage_data import SECRET_LEVEL_BUTTON
+from tgbot.handlers.onboarding.manage_data import SECRET_LEVEL_BUTTON, SET_LANG_UZB, SET_LANG_RU
 from tgbot.handlers.broadcast_message.manage_data import CONFIRM_DECLINE_BROADCAST
 from tgbot.handlers.broadcast_message.static_text import broadcast_command
+
+START = 0
+GREETING_NEW_USER = 1
+ASK_NAME = 2
+MAIN_MENU = 3
+HANDLE_MENU = 10
+CALL_COURIER = 20
+HANDLE_DATE = 21
+HANDLE_TIME = 22
+HANDLE_GEO = 23
+HANDLE_CONTACT = 24
+PRICE = 30
+CONTACT = 40
 
 
 def setup_dispatcher(dp):
@@ -31,27 +46,52 @@ def setup_dispatcher(dp):
     Adding handlers for events from Telegram
     """
     # onboarding
-    dp.add_handler(CommandHandler("start", onboarding_handlers.command_start))
-
-    # admin commands
-    dp.add_handler(CommandHandler("admin", admin_handlers.admin))
-    dp.add_handler(CommandHandler("stats", admin_handlers.stats))
-    dp.add_handler(CommandHandler('export_users', admin_handlers.export_users))
+    # dp.add_handler(CommandHandler("start", onboarding_handlers.command_start))
+    # dp.add_handler(CommandHandler("cancel", onboarding_handlers.command_cancel))
+    # dp.add_handler(CommandHandler("price", price_handlers.product_categories))
 
     # location
-    dp.add_handler(CommandHandler("ask_location", location_handlers.ask_for_location))
-    dp.add_handler(MessageHandler(Filters.location, location_handlers.location_handler))
+    # dp.add_handler(CommandHandler("ask_location", location_handlers.ask_for_location))
+    # dp.add_handler(MessageHandler(Filters.location, location_handlers.location_handler))
 
-    # secret level
-    dp.add_handler(CallbackQueryHandler(onboarding_handlers.secret_level, pattern=f"^{SECRET_LEVEL_BUTTON}"))
+    # dp.add_handler(ConversationHandler(
+    #     entry_points=[CallbackQueryHandler(onboarding_handlers.set_user_language_uz, pattern=f"^{SET_LANG_UZB}"),
+    #                   CallbackQueryHandler(onboarding_handlers.set_user_language_ru, pattern=f"^{SET_LANG_RU}")],
+    #     states={
+    #         ASK_NAME: [MessageHandler(Filters.text, onboarding_handlers.ask_name)]
+    #     },
+    #     fallbacks=[CommandHandler("cancel", ConversationHandler.END)]
+    # ))
 
-    # broadcast message
-    dp.add_handler(
-        MessageHandler(Filters.regex(rf'^{broadcast_command}(/s)?.*'), broadcast_handlers.broadcast_command_with_message)
-    )
-    dp.add_handler(
-        CallbackQueryHandler(broadcast_handlers.broadcast_decision_handler, pattern=f"^{CONFIRM_DECLINE_BROADCAST}")
-    )
+    dp.add_handler(ConversationHandler(
+        entry_points=[CommandHandler("start", onboarding_handlers.command_start)],
+        states={
+            START: [CommandHandler("start", onboarding_handlers.command_start)],
+            GREETING_NEW_USER: [
+                CallbackQueryHandler(onboarding_handlers.set_user_language_uz, pattern=f"^{SET_LANG_UZB}"),
+                CallbackQueryHandler(onboarding_handlers.set_user_language_ru, pattern=f"^{SET_LANG_RU}")
+            ],
+            ASK_NAME: [MessageHandler(Filters.text, onboarding_handlers.ask_name)],
+            MAIN_MENU: [MessageHandler(Filters.update, onboarding_handlers.main_menu)],
+            HANDLE_MENU: [
+                MessageHandler(Filters.regex(r'Посмотреть цены') | Filters.regex(r'Narxlarni ko`rish'), price_handlers.product_categories),
+                MessageHandler(Filters.regex(r'Приехать к нам') | Filters.regex(r'Biznikiga kelish'), location_handlers.address_handler),
+                MessageHandler(Filters.regex(r'Вызвать курьера') | Filters.regex(r'Kuryer chaqirish'),
+                               courier_handlers.call_courier)
+            ],
+            CALL_COURIER: [],
+            HANDLE_DATE: [MessageHandler(Filters.text, courier_handlers.handle_date)],
+            HANDLE_TIME: [MessageHandler(Filters.text, courier_handlers.handle_time)],
+            HANDLE_GEO: [MessageHandler(Filters.location, courier_handlers.handle_geo)],
+            HANDLE_CONTACT: [MessageHandler(Filters.contact, courier_handlers.handle_contacts)],
+            PRICE: [
+                MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Orqaga'), onboarding_handlers.main_menu),
+                MessageHandler(Filters.text, price_handlers.product_prices),
+            ],
+            CONTACT: [MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Orqaga'), onboarding_handlers.main_menu)]
+        },
+        fallbacks=[CommandHandler("cancel", onboarding_handlers.command_cancel)]
+    ))
 
     # files
     dp.add_handler(MessageHandler(
@@ -60,18 +100,6 @@ def setup_dispatcher(dp):
 
     # handling errors
     dp.add_error_handler(error.send_stacktrace_to_tg_chat)
-
-    # EXAMPLES FOR HANDLERS
-    # dp.add_handler(MessageHandler(Filters.text, <function_handler>))
-    # dp.add_handler(MessageHandler(
-    #     Filters.document, <function_handler>,
-    # ))
-    # dp.add_handler(CallbackQueryHandler(<function_handler>, pattern="^r\d+_\d+"))
-    # dp.add_handler(MessageHandler(
-    #     Filters.chat(chat_id=int(TELEGRAM_FILESTORAGE_ID)),
-    #     # & Filters.forwarded & (Filters.photo | Filters.video | Filters.animation),
-    #     <function_handler>,
-    # ))
 
     return dp
 
@@ -112,37 +140,15 @@ def process_telegram_event(update_json):
 
 def set_up_commands(bot_instance: Bot) -> None:
     langs_with_commands: Dict[str, Dict[str, str]] = {
-        'en': {
-            'start': 'Start django bot 🚀',
-            'stats': 'Statistics of bot 📊',
-            'admin': 'Show admin info ℹ️',
-            'ask_location': 'Send location 📍',
-            'broadcast': 'Broadcast message 📨',
-            'export_users': 'Export users.csv 👥',
-        },
-        'es': {
-            'start': 'Iniciar el bot de django 🚀',
-            'stats': 'Estadísticas de bot 📊',
-            'admin': 'Mostrar información de administrador ℹ️',
-            'ask_location': 'Enviar ubicación 📍',
-            'broadcast': 'Mensaje de difusión 📨',
-            'export_users': 'Exportar users.csv 👥',
-        },
-        'fr': {
-            'start': 'Démarrer le bot Django 🚀',
-            'stats': 'Statistiques du bot 📊',
-            'admin': "Afficher les informations d'administrateur ℹ️",
-            'ask_location': 'Envoyer emplacement 📍',
-            'broadcast': 'Message de diffusion 📨',
-            "export_users": 'Exporter users.csv 👥',
-        },
         'ru': {
-            'start': 'Запустить django бота 🚀',
-            'stats': 'Статистика бота 📊',
-            'admin': 'Показать информацию для админов ℹ️',
-            'broadcast': 'Отправить сообщение 📨',
-            'ask_location': 'Отправить локацию 📍',
-            'export_users': 'Экспорт users.csv 👥',
+            'start': 'Запустить бота 🚀',
+            'price': 'Посмотреть цены 💲',
+            'cancel': 'Отмена'
+        },
+        'uz': {
+            'start': 'Botni ishga tushirish 🚀',
+            'price': 'Narxlarni ko`rish 💲',
+            'cancel': 'Bekor qilish'
         }
     }
 

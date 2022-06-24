@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     # local apps
     'tgbot.apps.TgbotConfig',
     'arcgis',
+    'core',
+    'order'
 ]
 
 MIDDLEWARE = [
@@ -97,8 +99,20 @@ ASGI_APPLICATION = 'dtb.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': dj_database_url.config(conn_max_age=600, default="sqlite:///db.sqlite3"),
+# }
+
+
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, default="sqlite:///db.sqlite3"),
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'laundry_bot',
+        'USER': 'postgres',
+        'PASSWORD': '123321',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 }
 
 # Password validation

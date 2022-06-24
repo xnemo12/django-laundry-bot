@@ -64,6 +64,11 @@ class User(CreateUpdateTracker):
             return cls.objects.filter(user_id=int(username)).first()
         return cls.objects.filter(username__iexact=username).first()
 
+    @classmethod
+    def get_user_from_update(cls, update: Update) -> Optional[User]:
+        data = extract_user_data_from_update(update)
+        return  cls.objects.filter(user_id=data["user_id"]).first()
+
     @property
     def invited_users(self) -> QuerySet[User]:
         return User.objects.filter(deep_link=str(self.user_id), created_at__gt=self.created_at)
@@ -73,6 +78,13 @@ class User(CreateUpdateTracker):
         if self.username:
             return f'@{self.username}'
         return f"{self.first_name} {self.last_name}" if self.last_name else f"{self.first_name}"
+
+    @property
+    def lng(self):
+        lang = self.language_code
+        if lang not in ('ru', 'uz'):
+            lang = 'ru'
+        return lang
 
 
 class Location(CreateTracker):

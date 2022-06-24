@@ -1,6 +1,6 @@
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
-from tgbot.handlers.location.static_text import SEND_LOCATION
+from tgbot.handlers.location.static_text import SEND_LOCATION, back_button
 
 
 def send_location_keyboard() -> ReplyKeyboardMarkup:
@@ -9,4 +9,13 @@ def send_location_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         [[KeyboardButton(text=SEND_LOCATION, request_location=True)]],
         resize_keyboard=True
+    )
+
+
+def back_keyboard(lang) -> ReplyKeyboardMarkup:
+    buttons = [[KeyboardButton(text=back_button[lang])]]
+    return ReplyKeyboardMarkup(
+        buttons,
+        resize_keyboard=True,
+        one_time_keyboard=True
     )
