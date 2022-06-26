@@ -45,23 +45,6 @@ def setup_dispatcher(dp):
     """
     Adding handlers for events from Telegram
     """
-    # onboarding
-    # dp.add_handler(CommandHandler("start", onboarding_handlers.command_start))
-    # dp.add_handler(CommandHandler("cancel", onboarding_handlers.command_cancel))
-    # dp.add_handler(CommandHandler("price", price_handlers.product_categories))
-
-    # location
-    # dp.add_handler(CommandHandler("ask_location", location_handlers.ask_for_location))
-    # dp.add_handler(MessageHandler(Filters.location, location_handlers.location_handler))
-
-    # dp.add_handler(ConversationHandler(
-    #     entry_points=[CallbackQueryHandler(onboarding_handlers.set_user_language_uz, pattern=f"^{SET_LANG_UZB}"),
-    #                   CallbackQueryHandler(onboarding_handlers.set_user_language_ru, pattern=f"^{SET_LANG_RU}")],
-    #     states={
-    #         ASK_NAME: [MessageHandler(Filters.text, onboarding_handlers.ask_name)]
-    #     },
-    #     fallbacks=[CommandHandler("cancel", ConversationHandler.END)]
-    # ))
 
     dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler("start", onboarding_handlers.command_start)],
@@ -75,20 +58,31 @@ def setup_dispatcher(dp):
             MAIN_MENU: [MessageHandler(Filters.update, onboarding_handlers.main_menu)],
             HANDLE_MENU: [
                 MessageHandler(Filters.regex(r'Посмотреть цены') | Filters.regex(r'Narxlarni ko`rish'), price_handlers.product_categories),
-                MessageHandler(Filters.regex(r'Приехать к нам') | Filters.regex(r'Biznikiga kelish'), location_handlers.address_handler),
+                MessageHandler(Filters.regex(r'Приехать к нам') | Filters.regex(r'Bizning manzil'), location_handlers.address_handler),
                 MessageHandler(Filters.regex(r'Вызвать курьера') | Filters.regex(r'Kuryer chaqirish'),
                                courier_handlers.call_courier)
             ],
             CALL_COURIER: [],
-            HANDLE_DATE: [MessageHandler(Filters.text, courier_handlers.handle_date)],
-            HANDLE_TIME: [MessageHandler(Filters.text, courier_handlers.handle_time)],
-            HANDLE_GEO: [MessageHandler(Filters.location, courier_handlers.handle_geo)],
-            HANDLE_CONTACT: [MessageHandler(Filters.contact, courier_handlers.handle_contacts)],
+            HANDLE_DATE: [
+                MessageHandler(Filters.regex(r'Отменить') | Filters.regex(r'Bekor qilish'), courier_handlers.handle_cancel),
+                MessageHandler(Filters.text, courier_handlers.handle_date),
+            ],
+            HANDLE_TIME: [
+                MessageHandler(Filters.regex(r'Отменить') | Filters.regex(r'Bekor qilish'), courier_handlers.handle_cancel),
+                MessageHandler(Filters.text, courier_handlers.handle_time),
+            ],
+            HANDLE_GEO: [
+                MessageHandler(Filters.regex(r'Отменить') | Filters.regex(r'Bekor qilish'), courier_handlers.handle_cancel),
+                MessageHandler(Filters.location, courier_handlers.handle_geo),
+            ],
+            HANDLE_CONTACT: [
+                MessageHandler(Filters.regex(r'Отменить') | Filters.regex(r'Bekor qilish'), courier_handlers.handle_cancel),
+                MessageHandler(Filters.contact, courier_handlers.handle_contacts)],
             PRICE: [
-                MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Orqaga'), onboarding_handlers.main_menu),
+                MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Ortga'), onboarding_handlers.main_menu),
                 MessageHandler(Filters.text, price_handlers.product_prices),
             ],
-            CONTACT: [MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Orqaga'), onboarding_handlers.main_menu)]
+            CONTACT: [MessageHandler(Filters.regex(r'Назад') | Filters.regex(r'Ortga'), onboarding_handlers.main_menu)]
         },
         fallbacks=[CommandHandler("cancel", onboarding_handlers.command_cancel)]
     ))

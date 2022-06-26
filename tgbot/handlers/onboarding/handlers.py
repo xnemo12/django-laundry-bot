@@ -8,9 +8,11 @@ from tgbot.handlers.onboarding.keyboards import make_keyboard_for_start_command,
 
 def command_start(update: Update, context: CallbackContext) -> int:
     u, created = User.get_user_and_created(update, context)
-    lang = u.language_code if created else 'ru'
+    lang = u.lng
     if lang not in ('ru', 'uz'):
         lang = 'ru'
+
+    update.message.reply_sticker('CAACAgIAAxkBAAEVZi1iuIlmMIyufLOiSVP2hHph8N_9jAACJBgAAr0pyEnNmoPWoC7BBSkE')
 
     if created:
         text = static_text.start_created[lang].format(first_name=u.first_name)
@@ -25,7 +27,7 @@ def command_start(update: Update, context: CallbackContext) -> int:
 
 def main_menu(update: Update, _) -> int:
     u = User.get_user_from_update(update)
-    update.message.reply_text(text='Выберите действие', reply_markup=main_menu_keyboard(u.lng))
+    update.message.reply_text(text=static_text.choose_action_text[u.lng], reply_markup=main_menu_keyboard(u.lng))
     return 10
 
 
@@ -57,17 +59,23 @@ def set_user_language_ru(update: Update, context: CallbackContext) -> int:
 
 def ask_name(update: Update, _) -> int:
     user = User.get_user_from_update(update)
-    lng = user.language_code
+    lng = user.lng
+    user_name = update.message.text
+
+    user.first_name = user_name
+    user.save()
+
     update.message.reply_text(
-        text=f'Tanishganimdan xursandman {update.message.text}, ?',
+        text=static_text.greeting_text[lng].format(user_name),
         reply_markup=main_menu_keyboard(lng))
     return 10
 
 
 def command_cancel(update: Update, _):
+    user = User.get_user_from_update(update)
     print("CANCEL")
     update.message.reply_text(
-        'Выберите действие',
+        static_text.choose_action_text[user.lng],
         reply_markup=ReplyKeyboardRemove()
     )
     return 3

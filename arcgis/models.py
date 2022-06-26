@@ -41,7 +41,7 @@ class Arcgis(CreateTracker):
     objects = GetOrNoneManager()
 
     def __str__(self):
-        return f"{self.location}, city: {self.city}, country_code: {self.country_code}"
+        return f"{self.city}, {self.region}, {self.address}"
 
     @classmethod
     def from_json(cls, arcgis_json: Dict, location_id: int) -> None:

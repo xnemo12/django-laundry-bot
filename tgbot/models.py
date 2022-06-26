@@ -28,18 +28,22 @@ class User(CreateUpdateTracker):
     is_blocked_bot = models.BooleanField(default=False)
 
     is_admin = models.BooleanField(default=False)
+    is_courier = models.BooleanField(default=False)
 
     objects = GetOrNoneManager()  # user = User.objects.get_or_none(user_id=<some_id>)
     admins = AdminUserManager()  # User.admins.all()
 
     def __str__(self):
-        return f'@{self.username}' if self.username is not None else f'{self.user_id}'
+        return f'{self.first_name} {self.last_name}'
+        # return f'@{self.username}' if self.username is not None else f'{self.first_name} {self.last_name}'
 
     @classmethod
     def get_user_and_created(cls, update: Update, context: CallbackContext) -> Tuple[User, bool]:
         """ python-telegram-bot's Update, Context --> User instance """
         data = extract_user_data_from_update(update)
-        u, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
+        u, created = cls.get_user_from_update(update), False
+        if u is None:
+            u, created = cls.objects.update_or_create(user_id=data["user_id"], defaults=data)
 
         if created:
             # Save deep_link to User model
@@ -67,7 +71,7 @@ class User(CreateUpdateTracker):
     @classmethod
     def get_user_from_update(cls, update: Update) -> Optional[User]:
         data = extract_user_data_from_update(update)
-        return  cls.objects.filter(user_id=data["user_id"]).first()
+        return cls.objects.filter(user_id=data["user_id"]).first()
 
     @property
     def invited_users(self) -> QuerySet[User]:
