@@ -5,7 +5,8 @@ from telegram.ext import CallbackContext
 import re
 
 from order.models import Order
-from tgbot.handlers.courier.keyboards import days_keyboard, times_keyboard, location_keyboard, contact_keyboard
+from tgbot.handlers.courier.keyboards import days_keyboard, times_keyboard, location_keyboard, contact_keyboard, \
+    keyboard_courier_list
 from tgbot.handlers.courier.static_text import choose_date_text, choose_time_text, send_location_text, \
     send_contact_text, order_received_text, order_cancel_text
 from tgbot.handlers.onboarding.keyboards import main_menu_keyboard
@@ -68,7 +69,7 @@ def handle_contacts(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(text=order_received_text[user.lng], reply_markup=main_menu_keyboard(user.lng))
 
     admin = User.objects.filter(is_admin=True).first()
-    context.bot.send_message(admin.user_id, "Новый заказ!")
+    context.bot.send_message(admin.user_id, "Новый заказ!", reply_markup=keyboard_courier_list())
 
     return 10
 

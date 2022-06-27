@@ -1,10 +1,11 @@
 import datetime
 import locale
 
-from telegram import ReplyKeyboardMarkup, KeyboardButton
+from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 from tgbot.handlers.courier.static_text import location_button, contact_button, cancel_button
 from tgbot.handlers.utils.lists import to_pair_list
+from tgbot.models import User
 
 
 def days_keyboard(lng) -> ReplyKeyboardMarkup:
@@ -39,3 +40,12 @@ def contact_keyboard(lng) -> ReplyKeyboardMarkup:
         [[KeyboardButton(text=contact_button[lng], request_contact=True)], [KeyboardButton(text=cancel_button[lng])]],
         resize_keyboard=True
     )
+
+
+def keyboard_courier_list() -> InlineKeyboardMarkup:
+    couriers = User.objects.filter(is_courier=True).all()
+    buttons = [[
+        InlineKeyboardButton(courier.tg_str, callback_data='SET_COURIER')
+    ] for courier in couriers]
+
+    return InlineKeyboardMarkup(buttons)

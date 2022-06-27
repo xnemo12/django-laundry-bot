@@ -46,6 +46,8 @@ def setup_dispatcher(dp):
     Adding handlers for events from Telegram
     """
 
+    dp.add_handler(CallbackQueryHandler(admin_handlers.set_courier, pattern=f"^SET_COURIER"))
+
     dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler("start", onboarding_handlers.command_start)],
         states={

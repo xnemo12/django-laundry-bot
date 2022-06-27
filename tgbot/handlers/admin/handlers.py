@@ -47,3 +47,7 @@ def export_users(update: Update, context: CallbackContext) -> None:
     users = User.objects.all().values()
     csv_users = _get_csv_from_qs_values(users)
     context.bot.send_document(chat_id=u.user_id, document=csv_users)
+
+
+def set_courier(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text('Set user!')
