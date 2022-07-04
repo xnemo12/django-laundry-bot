@@ -42,10 +42,26 @@ def contact_keyboard(lng) -> ReplyKeyboardMarkup:
     )
 
 
-def keyboard_courier_list() -> InlineKeyboardMarkup:
+def keyboard_courier_list(order_id) -> InlineKeyboardMarkup:
     couriers = User.objects.filter(is_courier=True).all()
     buttons = [[
-        InlineKeyboardButton(courier.tg_str, callback_data='SET_COURIER')
+        InlineKeyboardButton(f'{courier.first_name} {courier.last_name}',
+                             callback_data=f'courier:{courier.user_id}:{order_id}')
     ] for courier in couriers]
 
+    return InlineKeyboardMarkup(buttons)
+
+
+def order_accept_keyboard(order_id) -> InlineKeyboardMarkup:
+    buttons = [[
+        InlineKeyboardButton(f'Принять', callback_data=f'action_accept:{order_id}'),
+        InlineKeyboardButton(f'Отказать', callback_data=f'action_cancel:{order_id}')
+    ]]
+    return InlineKeyboardMarkup(buttons)
+
+
+def order_pick_keyboard(order_id) -> InlineKeyboardMarkup:
+    buttons = [[
+        InlineKeyboardButton(f'Получил вещи', callback_data=f'action_picked:{order_id}')
+    ]]
     return InlineKeyboardMarkup(buttons)

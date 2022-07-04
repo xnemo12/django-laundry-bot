@@ -6,7 +6,7 @@ import re
 
 from order.models import Order
 from tgbot.handlers.courier.keyboards import days_keyboard, times_keyboard, location_keyboard, contact_keyboard, \
-    keyboard_courier_list
+    keyboard_courier_list, order_accept_keyboard, order_pick_keyboard
 from tgbot.handlers.courier.static_text import choose_date_text, choose_time_text, send_location_text, \
     send_contact_text, order_received_text, order_cancel_text
 from tgbot.handlers.onboarding.keyboards import main_menu_keyboard
@@ -69,7 +69,19 @@ def handle_contacts(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(text=order_received_text[user.lng], reply_markup=main_menu_keyboard(user.lng))
 
     admin = User.objects.filter(is_admin=True).first()
-    context.bot.send_message(admin.user_id, "Новый заказ!", reply_markup=keyboard_courier_list())
+
+    if admin:
+        order_text = f"Новый заказ!\n" \
+                     f"Номер заказа: {order.id} \n" \
+                     f"ФИО: {order.user.first_name} {order.user.last_name} \n" \
+                     f"Адрес: {order.location.address} \n" \
+                     f"Номер телефона: {order.phone} \n" \
+                     f"Комментарий: {order.comment}"
+
+        context.bot.send_location(admin.user_id,
+                                  latitude=order.location.location.latitude,
+                                  longitude=order.location.location.longitude)
+        context.bot.send_message(admin.user_id, f"{order_text}", reply_markup=keyboard_courier_list(order.id))
 
     return 10
 
@@ -86,3 +98,61 @@ def handle_cancel(update: Update, context: CallbackContext) -> int:
 
     update.message.reply_text(text=order_cancel_text[user.lng], reply_markup=main_menu_keyboard(user.lng))
     return 10
+
+
+def set_courier(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split(":")
+    order_id = data[2]
+    order = Order.objects.get(id=order_id)
+    order.state = Order.OrderState.CONFIRMED
+    order.save()
+
+    if order:
+        order_text = f"Новый заказ!\n" \
+                     f"Номер заказа: {order.id} \n" \
+                     f"ФИО: {order.user.first_name} {order.user.last_name} \n" \
+                     f"Адрес: {order.location.address} \n" \
+                     f"Номер телефона: {order.phone} \n" \
+                     f"Комментарий: {order.comment}"
+        context.bot.send_location(chat_id=data[1],
+                                  latitude=order.location.location.latitude,
+                                  longitude=order.location.location.longitude)
+        context.bot.send_message(chat_id=data[1], text=order_text, reply_markup=order_accept_keyboard(order_id))
+
+
+def courier_accept(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split(":")
+
+    courier = User.get_user_from_update(update)
+
+    order_id = data[1]
+    order = Order.objects.get(id=order_id)
+    order.state = Order.OrderState.EXECUTING
+    order.courier = courier
+    order.confirmed_time = datetime.datetime.now()
+    order.save()
+
+    query.edit_message_text(text='Заявка принята', reply_markup=order_pick_keyboard(order_id))
+
+
+def courier_cancel(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split(":")
+    order_id = data[1]
+    order = Order.objects.get(id=order_id)
+    order.state = Order.OrderState.CANCELLED
+    order.save()
+    query.edit_message_text(text='Заявка отменена')
+
+
+def courier_picked(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    data = query.data.split(":")
+    order_id = data[1]
+    order = Order.objects.get(id=order_id)
+    order.state = Order.OrderState.PICKED
+    order.picked_time = datetime.datetime.now()
+    order.save()
+    query.edit_message_text(text='Вещи получены')

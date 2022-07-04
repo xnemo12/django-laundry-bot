@@ -50,4 +50,12 @@ def export_users(update: Update, context: CallbackContext) -> None:
 
 
 def set_courier(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('Set user!')
+    user = User.get_user_from_update(update)
+
+    query = update.callback_query
+    user_id = query.data
+
+    context.bot.send_message(
+        text='Set courier! ' + user_id,
+        chat_id=user.user_id
+    )
