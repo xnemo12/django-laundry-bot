@@ -60,6 +60,3 @@ services:
       - redis
       - celery
       - web
-
-volumes:
-  postgres_data:
