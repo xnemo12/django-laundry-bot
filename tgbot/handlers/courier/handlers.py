@@ -47,7 +47,7 @@ def handle_geo(update: Update, context: CallbackContext) -> int:
 
     order_id = context.user_data["order_id"]
     order = Order.objects.get(id=order_id)
-    order.location = location.arcgis
+    order.location = location
     order.save()
 
     update.message.reply_text(text=send_contact_text[user.lng], reply_markup=contact_keyboard(user.lng))
@@ -69,18 +69,19 @@ def handle_contacts(update: Update, context: CallbackContext) -> int:
     update.message.reply_text(text=order_received_text[user.lng], reply_markup=main_menu_keyboard(user.lng))
 
     admin = User.objects.filter(is_admin=True).first()
+    address = order.location.arcgis.address if order.location.arcgis is not None else ""
 
     if admin:
         order_text = f"Новый заказ!\n" \
                      f"Номер заказа: {order.id} \n" \
                      f"ФИО: {order.user.first_name} {order.user.last_name} \n" \
-                     f"Адрес: {order.location.address} \n" \
+                     f"Адрес: {address} \n" \
                      f"Номер телефона: {order.phone} \n" \
                      f"Комментарий: {order.comment}"
 
         context.bot.send_location(admin.user_id,
-                                  latitude=order.location.location.latitude,
-                                  longitude=order.location.location.longitude)
+                                  latitude=order.location.latitude,
+                                  longitude=order.location.longitude)
         context.bot.send_message(admin.user_id, f"{order_text}", reply_markup=keyboard_courier_list(order.id))
 
     return 10
@@ -109,15 +110,16 @@ def set_courier(update: Update, context: CallbackContext) -> None:
     order.save()
 
     if order:
+        address = order.location.arcgis.address if order.location.arcgis is not None else ""
         order_text = f"Новый заказ!\n" \
                      f"Номер заказа: {order.id} \n" \
                      f"ФИО: {order.user.first_name} {order.user.last_name} \n" \
-                     f"Адрес: {order.location.address} \n" \
+                     f"Адрес: {address} \n" \
                      f"Номер телефона: {order.phone} \n" \
                      f"Комментарий: {order.comment}"
         context.bot.send_location(chat_id=data[1],
-                                  latitude=order.location.location.latitude,
-                                  longitude=order.location.location.longitude)
+                                  latitude=order.location.latitude,
+                                  longitude=order.location.longitude)
         context.bot.send_message(chat_id=data[1], text=order_text, reply_markup=order_accept_keyboard(order_id))
 
 

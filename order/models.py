@@ -1,7 +1,6 @@
 from django.db import models
 
-from arcgis.models import Arcgis
-from tgbot.models import User
+from tgbot.models import User, Location
 from utils.models import CreateUpdateTracker, nb
 from django.utils.translation import gettext_lazy as _
 
@@ -23,7 +22,7 @@ class Order(CreateUpdateTracker):
 
     user = models.ForeignKey(User, verbose_name=_('Клиент'), related_name='users', on_delete=models.CASCADE)
     courier = models.ForeignKey(User, verbose_name=_('Курьер'), related_name='couriers', on_delete=models.CASCADE, **nb)
-    location = models.ForeignKey(Arcgis, verbose_name=_('Локация'), on_delete=models.CASCADE, **nb)
+    location = models.ForeignKey(Location, verbose_name=_('Локация'), on_delete=models.CASCADE, **nb)
     order_time = models.DateTimeField(verbose_name=_('Время заказа'), **nb)
     confirmed_time = models.DateTimeField(verbose_name=_('Согласована'), **nb)
     picked_time = models.DateTimeField(verbose_name=_('Курьер забрал заказ'), **nb)
