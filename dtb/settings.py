@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'tgbot.apps.TgbotConfig',
     'arcgis',
     'core',
-    'order'
+    'order',
+    'webapp'
 ]
 
 MIDDLEWARE = [
@@ -65,21 +66,22 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
-INTERNAL_IPS = [
+# INTERNAL_IPS = [
     # ...
-    '127.0.0.1',
+#    '127.0.0.1',
     # ...
-]
+# ]
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'dtb.urls'
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR, ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,20 +101,8 @@ ASGI_APPLICATION = 'dtb.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': dj_database_url.config(conn_max_age=600, default="sqlite:///db.sqlite3"),
-# }
-
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'laundry_bot'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '123321'),
-        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
+    'default': dj_database_url.config(conn_max_age=600, default="sqlite:///db.sqlite3"),
 }
 
 # Password validation
@@ -146,8 +136,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# WHITENOISE_MANIFEST_STRICT = False
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
