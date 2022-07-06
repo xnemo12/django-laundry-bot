@@ -75,7 +75,7 @@ def command_cancel(update: Update, _):
     user = User.get_user_from_update(update)
     update.message.reply_text(
         static_text.choose_action_text[user.lng],
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=main_menu_keyboard(user.lng)
     )
     return 10
 
