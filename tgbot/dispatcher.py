@@ -52,8 +52,6 @@ def setup_dispatcher(dp):
     dp.add_handler(CallbackQueryHandler(courier_handlers.courier_cancel, pattern=f"^action_cancel*"))
     dp.add_handler(CallbackQueryHandler(courier_handlers.courier_picked, pattern=f"^action_picked*"))
 
-    dp.add_handler(MessageHandler(Filters.text, onboarding_handlers.command_cancel))
-
     dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler("start", onboarding_handlers.command_start)],
         states={
@@ -94,6 +92,8 @@ def setup_dispatcher(dp):
         },
         fallbacks=[CommandHandler("cancel", onboarding_handlers.command_cancel)]
     ))
+
+    dp.add_handler(MessageHandler(Filters.text, onboarding_handlers.command_cancel))
 
     # files
     dp.add_handler(MessageHandler(
