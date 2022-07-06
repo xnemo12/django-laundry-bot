@@ -77,5 +77,5 @@ def command_cancel(update: Update, _):
         static_text.choose_action_text[user.lng],
         reply_markup=main_menu_keyboard(user.lng)
     )
-    return 10
+    return 0
 
