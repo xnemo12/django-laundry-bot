@@ -3757,8 +3757,8 @@ jQuery(function($) {
 	});
 
 	var sliderWrapper = $("#js-mainSlider"),
-		srcAjaxDesktop = "ajax-content/mainslider-desktop.html",
-		srcAjaxMobile = "ajax-content/mainslider-mobile.html";
+		srcAjaxDesktop = "slider",
+		srcAjaxMobile = "slider-mobile";
 
 
 	function debouncer(func, timeout) {
