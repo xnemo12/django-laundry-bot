@@ -52,6 +52,8 @@ def setup_dispatcher(dp):
     dp.add_handler(CallbackQueryHandler(courier_handlers.courier_cancel, pattern=f"^action_cancel*"))
     dp.add_handler(CallbackQueryHandler(courier_handlers.courier_picked, pattern=f"^action_picked*"))
 
+    dp.add_handler(MessageHandler(Filters.text, courier_handlers.handle_date))
+
     dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler("start", onboarding_handlers.command_start)],
         states={
@@ -142,12 +144,10 @@ def set_up_commands(bot_instance: Bot) -> None:
     langs_with_commands: Dict[str, Dict[str, str]] = {
         'ru': {
             'start': 'Запустить бота 🚀',
-            'price': 'Посмотреть цены 💲',
             'cancel': 'Отмена'
         },
         'uz': {
             'start': 'Botni ishga tushirish 🚀',
-            'price': 'Narxlarni ko`rish 💲',
             'cancel': 'Bekor qilish'
         }
     }

@@ -5,8 +5,8 @@
 <head>
     <meta charset="utf-8">
     <title>Kenguru24 - ваш надежный помощник</title>
-    <meta name="keywords" content="химчистка, доставка">
-    <meta name="description" content="Kenguru24 - ваш надежный помощник">
+    <meta name="keywords" content="химчистка, доставка, Ташкент">
+    <meta name="description" content="Kenguru24 - Химчистка с доставкой в Ташкенте, услуги стирки и химчистки одежды">
     <meta name="author" content="muxtarovich@ya.ru">
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
     <meta name="format-detection" content="telephone=no">
@@ -78,7 +78,7 @@
             <div class="tt-holder">
                 <div class="tt-col-left">
                     <!-- logo -->
-                    <a href="index.html" class="tt-logo tt-logo-alignment">
+                    <a href="\" class="tt-logo tt-logo-alignment">
                         <i class="icons-logo tt-icon"></i><span class="tt-base-color">Kenguru</span>24</a>
                     <!-- /logo -->
                 </div>
@@ -206,7 +206,7 @@
             </div>
         </div>
     </div>
-    <div class="lazyload bg-top-right" data-bg="images/wrapper02.png">
+    <div class="lazyload bg-top-right" data-bg="{% static 'images/wrapper02.png' %}">
         <div class="section-indent no-margin">
             <div class="container-fluid">
                 <div class="title-block text-center">
@@ -844,12 +844,7 @@
             <div class="box02 box02__img-right">
                 <div class="box02__img">
                     <picture>
-                        <source srcset="{% static 'images/box02-img02-sm.webp' %}" media="(max-width: 650px)" type="image/webp">
-                        <source srcset="{% static 'images/box02-img02-sm.jpg' %}" media="(max-width: 650px)" type="image/png">
-                        <source srcset="{% static 'images/box02-img02-md.webp' %}" media="(max-width: 1024px)" type="image/webp">
-                        <source srcset="{% static 'images/box02-img02-md.jpg' %}" media="(max-width: 1024px)" type="image/png">
-                        <source srcset="{% static 'images/box02-img02.webp' %}" type="image/webp">
-                        <img src="{% static 'images/box02-img02.jpg' %}" alt="">
+                        <img src="{% static 'images/box02-img02-md.jpg' %}" alt="">
                     </picture>
                     <img class="tt-arrow" src="{% static 'images/arrow-img-left02.png' %}" alt="">
                 </div>
@@ -863,9 +858,10 @@
                         </h4>
                     </div>
                     <p>
-                        Download the our app and request our laundry service. Your clothes washed, folded and delivered
-                        to your doorstep. So go ahead and say yes to more time with the family, more happy hours, and
-                        more slapping the snooze button every morning — we've got laundry day covered.
+                        Подключите наш <a href="https://t.me/JLaundryBot" target="_blank">телеграм бот</a> и запросите услуги химчистки.
+                        Ваша одежда постирается, будет поглажена и доставлена к вашему порогу.
+                        Так что вперед и скажите «да» большему количеству времени с семьей,
+                        большему количеству счастливых часов.
                     </p>
 
                 </div>
@@ -901,7 +897,7 @@
     <div id="map" class="lazyload" data-bg="{% static 'images/map-index.jpg' %}">
         <iframe src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="lazyload"
                 data-expand="-220"
-                data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3111.5820008392016!2d-77.45701318432829!3d38.75035326320268!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89b65b93b943fb07%3A0xc8712e829da92b9e!2sHistoric%20District%2C%208494%20Signal%20Hill%20Rd%2C%20Manassas%2C%20VA%2020110%2C%20USA!5e0!3m2!1sen!2sua!4v1605172763191!5m2!1sen!2sua"
+                data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d748.5776650112518!2d69.29473839508671!3d41.36733477147352!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38aef395ac09a0cb%3A0xe1a7914b0434a229!2sCalifornia%20Learning%20Center!5e0!3m2!1sru!2s!4v1657130090113!5m2!1sru!2s"
                 allowfullscreen="" aria-hidden="false"></iframe>
     </div>
 </main>

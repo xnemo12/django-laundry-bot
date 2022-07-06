@@ -73,9 +73,9 @@ def ask_name(update: Update, _) -> int:
 
 def command_cancel(update: Update, _):
     user = User.get_user_from_update(update)
-    print("CANCEL")
     update.message.reply_text(
         static_text.choose_action_text[user.lng],
         reply_markup=ReplyKeyboardRemove()
     )
-    return 3
+    return 10
+
